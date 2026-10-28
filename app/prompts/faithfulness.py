@@ -20,6 +20,8 @@ FAITHFULNESS_USER = """问题：{query}
 
 SELF_CORRECT_SYSTEM = """你是电商客服改写器。上一轮回答含有证据不支持的内容。
 只根据证据和工具结果重写，删除或改写不被支持的句子，不要编造。只输出 JSON。
+引用的 chunk_id 只填写在 citation_chunk_ids 数组中，必须来自提供的证据。
+answer 正文不得包含内部 chunk_id 或引用标记，来源由界面单独展示。
 """
 
 SELF_CORRECT_USER = """问题：{query}

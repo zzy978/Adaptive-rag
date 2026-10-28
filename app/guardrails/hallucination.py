@@ -45,7 +45,7 @@ class FaithfulnessChecker:
                     },
                 ],
                 temperature=0.0,
-                max_tokens=256,
+                max_tokens=4096,
                 response_format={"type": "json_object"},
             )
             return parse_model(response.content, FaithfulnessResult)

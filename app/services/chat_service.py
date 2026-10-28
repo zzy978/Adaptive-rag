@@ -25,6 +25,7 @@ from app.retrieval.hybrid import HybridRetriever
 from app.retrieval.reranker import DocumentReranker
 from app.schemas.chat import ActionProposal, ChatRequest, ChatResponse
 from app.schemas.common import LatencyBreakdown, TokenUsage
+from app.services.answer_display import strip_chunk_ids
 from app.tools.factory import build_tool_registry
 from app.tools.registry import ToolRegistry
 
@@ -250,7 +251,11 @@ class ChatService:
         session_id: str,
         trace_id: str,
     ) -> ChatResponse:
-        answer = result.get("final_answer") or "暂时无法回答，请稍后重试。"
+        citations = result.get("citations") or []
+        known_ids = [chunk.chunk_id for chunk in result.get("retrieved_chunks") or []]
+        known_ids.extend(citation.chunk_id for citation in citations)
+        answer = strip_chunk_ids(result.get("final_answer") or "", known_ids)
+        answer = answer or "暂时无法回答，请稍后重试。"
         strategy = result.get("strategy")
         intent = result.get("intent")
         return ChatResponse(
@@ -260,7 +265,7 @@ class ChatService:
             intent=intent.label if intent else None,
             complexity=result.get("query_complexity"),
             strategy=strategy,
-            citations=result.get("citations") or [],
+            citations=citations,
             pending_action=result.get("pending_action"),
             refused=bool(result.get("refused")),
             error_code=result.get("error"),
